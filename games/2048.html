@@ -5,24 +5,34 @@
   <title>2048</title>
   <link rel="stylesheet" href="../style.css">
   <style>
-    .game-container {
+    .game-wrapper {
       width: 400px;
       max-width: 95vw;
       margin: 20px auto;
       background: #bbada0;
       padding: 15px;
       border-radius: 10px;
+      position: relative;
+    }
+    .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 10px;
-      touch-action: none; /* Prevent default scrolling */
     }
-    .cell {
+    .cell-bg {
       width: 85px;
       height: 85px;
       max-width: 20vw;
       max-height: 20vw;
       background: #cdc1b4;
+      border-radius: 5px;
+    }
+    .tile {
+      position: absolute;
+      width: 85px;
+      height: 85px;
+      max-width: 20vw;
+      max-height: 20vw;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -30,7 +40,15 @@
       font-weight: bold;
       border-radius: 5px;
       color: #776e65;
-      user-select: none;
+      transition: transform 0.15s ease-in-out;
+    }
+    .merge {
+      animation: pop 0.15s ease-in-out;
+    }
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
     }
     .score {
       margin: 10px;
@@ -58,19 +76,28 @@
   <div class="container">
     <h1>2048</h1>
     <p class="score">Score: <span id="score">0</span></p>
-    <div class="game-container" id="game"></div>
+    <div class="game-wrapper" id="wrapper">
+      <div class="grid">
+        <!-- background grid cells -->
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+        <div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div><div class="cell-bg"></div>
+      </div>
+    </div>
     <p id="status"></p>
     <button onclick="restartGame()">Restart</button>
   </div>
 
   <script>
-    const gameEl = document.getElementById("game");
+    const wrapper = document.getElementById("wrapper");
     const scoreEl = document.getElementById("score");
     const statusEl = document.getElementById("status");
-    let board, score;
+    const cellSize = 85 + 10; // tile size + gap
+    let board, score, tileId = 0;
 
     function initBoard() {
-      board = Array(4).fill().map(() => Array(4).fill(0));
+      board = Array(4).fill().map(() => Array(4).fill(null));
       score = 0;
       addRandomTile();
       addRandomTile();
@@ -81,29 +108,32 @@
       let empty = [];
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
-          if (board[r][c] === 0) empty.push([r, c]);
+          if (!board[r][c]) empty.push([r, c]);
         }
       }
       if (empty.length) {
         let [r, c] = empty[Math.floor(Math.random() * empty.length)];
-        board[r][c] = Math.random() < 0.9 ? 2 : 4;
+        board[r][c] = { id: tileId++, value: Math.random() < 0.9 ? 2 : 4, merged: false };
       }
     }
 
     function renderBoard() {
-      gameEl.innerHTML = "";
+      document.querySelectorAll(".tile").forEach(t => t.remove());
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
-          const div = document.createElement("div");
-          div.className = "cell";
-          if (board[r][c] !== 0) {
-            div.textContent = board[r][c];
-            div.style.background = getColor(board[r][c]);
-          } else {
-            div.textContent = "";
-            div.style.background = "#cdc1b4";
+          let tile = board[r][c];
+          if (tile) {
+            let div = document.createElement("div");
+            div.className = "tile";
+            div.textContent = tile.value;
+            div.style.background = getColor(tile.value);
+            div.style.transform = `translate(${c * cellSize}px, ${r * cellSize}px)`;
+            if (tile.merged) {
+              div.classList.add("merge");
+              tile.merged = false;
+            }
+            wrapper.appendChild(div);
           }
-          gameEl.appendChild(div);
         }
       }
       scoreEl.textContent = score;
@@ -121,20 +151,20 @@
     function slide(row) {
       let arr = row.filter(v => v);
       for (let i = 0; i < arr.length - 1; i++) {
-        if (arr[i] === arr[i + 1]) {
-          arr[i] *= 2;
-          score += arr[i];
-          arr[i + 1] = 0;
+        if (arr[i].value === arr[i+1].value) {
+          arr[i].value *= 2;
+          score += arr[i].value;
+          arr[i].merged = true;
+          arr.splice(i+1, 1);
         }
       }
-      arr = arr.filter(v => v);
-      while (arr.length < 4) arr.push(0);
+      while (arr.length < 4) arr.push(null);
       return arr;
     }
 
     function rotateBoard(times) {
       for (let t = 0; t < times; t++) {
-        let newBoard = Array(4).fill().map(() => Array(4).fill(0));
+        let newBoard = Array(4).fill().map(() => Array(4).fill(null));
         for (let r = 0; r < 4; r++) {
           for (let c = 0; c < 4; c++) {
             newBoard[c][3 - r] = board[r][c];
@@ -173,9 +203,9 @@
     function checkGameOver() {
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
-          if (board[r][c] === 0) return;
-          if (c < 3 && board[r][c] === board[r][c+1]) return;
-          if (r < 3 && board[r][c] === board[r+1][c]) return;
+          if (!board[r][c]) return;
+          if (c < 3 && board[r][c] && board[r][c+1] && board[r][c].value === board[r][c+1].value) return;
+          if (r < 3 && board[r][c] && board[r+1][c] && board[r][c].value === board[r+1][c].value) return;
         }
       }
       statusEl.textContent = "Game Over!";
@@ -194,19 +224,17 @@
       if (e.key === "ArrowDown") move("down");
     });
 
-    // Touch controls for iPad/phones
+    // Touch controls
     let touchStartX, touchStartY;
-    gameEl.addEventListener("touchstart", e => {
+    wrapper.addEventListener("touchstart", e => {
       const touch = e.changedTouches[0];
       touchStartX = touch.screenX;
       touchStartY = touch.screenY;
     });
-
-    gameEl.addEventListener("touchend", e => {
+    wrapper.addEventListener("touchend", e => {
       const touch = e.changedTouches[0];
       let dx = touch.screenX - touchStartX;
       let dy = touch.screenY - touchStartY;
-
       if (Math.abs(dx) > Math.abs(dy)) {
         if (dx > 30) move("right");
         else if (dx < -30) move("left");
