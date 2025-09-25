@@ -2,71 +2,42 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>2048 Game</title>
+  <title>2048 - BoredIdiots</title>
+  <link rel="stylesheet" href="../style.css">
   <style>
     body {
-      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
       font-family: Arial, sans-serif;
-      background: linear-gradient(135deg, #a855f7, #ec4899);
+      background: linear-gradient(135deg, #6a0dad, #ff69b4);
       color: white;
-      user-select: none;
+      margin: 0;
+      height: 100vh;
     }
 
-    /* Navigation bar */
-    .navbar {
+    nav {
+      width: 100%;
       display: flex;
       justify-content: center;
-      gap: 20px;
-      background: #6b21a8;
-      padding: 15px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      background: rgba(0, 0, 0, 0.3);
+      padding: 1em;
     }
 
-    .navbar a {
+    nav a {
       color: white;
+      margin: 0 15px;
       text-decoration: none;
       font-weight: bold;
-      font-size: 18px;
-      transition: color 0.2s ease-in-out;
     }
 
-    .navbar a:hover {
-      color: #f472b6;
+    h1 {
+      margin: 20px 0 10px 0;
     }
 
-    /* Game container */
-    .game-container {
-      background: #bbada0;
-      border-radius: 10px;
-      padding: 20px;
-      display: inline-block;
-      text-align: center;
-      margin: 30px auto;
-      display: block;
-    }
-
-    .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-    }
-
-    .title {
-      font-size: 36px;
-      font-weight: bold;
-      color: white;
-      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-    }
-
-    .score-box {
-      background: #776e65;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 5px;
-      font-weight: bold;
-      font-size: 18px;
+    .score {
+      font-size: 20px;
+      margin-bottom: 20px;
     }
 
     .grid {
@@ -75,12 +46,16 @@
       grid-template-columns: repeat(4, 80px);
       grid-template-rows: repeat(4, 80px);
       gap: 10px;
+      background: #bbada0;
+      padding: 10px;
+      border-radius: 10px;
+      touch-action: none;
     }
 
-    .cell-bg {
+    .cell {
       width: 80px;
       height: 80px;
-      background: #cdc1b4;
+      background: rgba(238, 228, 218, 0.35);
       border-radius: 5px;
     }
 
@@ -88,103 +63,60 @@
       position: absolute;
       width: 80px;
       height: 80px;
-      border-radius: 5px;
       display: flex;
       justify-content: center;
       align-items: center;
       font-size: 24px;
       font-weight: bold;
-      color: #776e65;
-      transition: transform 0.15s ease-in-out;
+      border-radius: 5px;
+      transition: transform 0.2s ease, background 0.2s ease;
     }
 
-    /* Merge animation */
-    .merge {
-      animation: pop 0.2s ease;
-    }
-
-    @keyframes pop {
-      0% { transform: scale(1); }
-      50% { transform: scale(1.2); }
-      100% { transform: scale(1); }
-    }
-
-    /* Tile colors */
-    .tile-2    { background: #eee4da; }
-    .tile-4    { background: #ede0c8; }
-    .tile-8    { background: #f2b179; color: #fff; }
-    .tile-16   { background: #f59563; color: #fff; }
-    .tile-32   { background: #f67c5f; color: #fff; }
-    .tile-64   { background: #f65e3b; color: #fff; }
-    .tile-128  { background: #edcf72; color: #fff; font-size: 20px; }
-    .tile-256  { background: #edcc61; color: #fff; font-size: 20px; }
-    .tile-512  { background: #edc850; color: #fff; font-size: 20px; }
-    .tile-1024 { background: #edc53f; color: #fff; font-size: 16px; }
-    .tile-2048 { background: #edc22e; color: #fff; font-size: 16px; }
+    .tile-2    { background: #eee4da; color: #776e65; }
+    .tile-4    { background: #ede0c8; color: #776e65; }
+    .tile-8    { background: #f2b179; color: white; }
+    .tile-16   { background: #f59563; color: white; }
+    .tile-32   { background: #f67c5f; color: white; }
+    .tile-64   { background: #f65e3b; color: white; }
+    .tile-128  { background: #edcf72; color: white; }
+    .tile-256  { background: #edcc61; color: white; }
+    .tile-512  { background: #edc850; color: white; }
+    .tile-1024 { background: #edc53f; color: white; }
+    .tile-2048 { background: #edc22e; color: white; }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
-  <div class="navbar">
+  <nav>
     <a href="../index.html">Home</a>
-    <a href="../games.html">Games</a>
     <a href="../contact.html">Contact</a>
-  </div>
+    <a href="../games.html">Games</a>
+  </nav>
 
-  <!-- Game container -->
-  <div class="game-container">
-    <div class="header">
-      <div class="title">2048</div>
-      <div class="score-box">Score: <span id="score">0</span></div>
-    </div>
-    <div class="grid" id="grid"></div>
-  </div>
+  <h1>2048</h1>
+  <div class="score">Score: <span id="score">0</span></div>
+  <div class="grid" id="grid"></div>
 
   <script>
     const grid = document.getElementById("grid");
-    const scoreEl = document.getElementById("score");
+    const scoreDisplay = document.getElementById("score");
     const size = 4;
-    let board = Array(size).fill().map(() => Array(size).fill(0));
     let score = 0;
-    const cellSize = 80;
-    const gap = 10;
+    let board = Array(size).fill().map(() => Array(size).fill(0));
+    let tileElements = {};
 
-    // Background cells
+    // Create grid background
     for (let i = 0; i < size * size; i++) {
       const cell = document.createElement("div");
-      cell.classList.add("cell-bg");
+      cell.classList.add("cell");
       grid.appendChild(cell);
     }
 
-    function getTilePosition(row, col) {
-      const x = col * (cellSize + gap);
-      const y = row * (cellSize + gap);
-      return `translate(${x}px, ${y}px)`;
+    function updateScore(points) {
+      score += points;
+      scoreDisplay.textContent = score;
     }
 
-    function drawBoard(mergedPositions = []) {
-      document.querySelectorAll(".tile").forEach(tile => tile.remove());
-
-      for (let r = 0; r < size; r++) {
-        for (let c = 0; c < size; c++) {
-          if (board[r][c] !== 0) {
-            const tile = document.createElement("div");
-            tile.className = `tile tile-${board[r][c]}`;
-            tile.textContent = board[r][c];
-            tile.style.transform = getTilePosition(r, c);
-
-            if (mergedPositions.some(pos => pos.r === r && pos.c === c)) {
-              tile.classList.add("merge");
-            }
-
-            grid.appendChild(tile);
-          }
-        }
-      }
-      scoreEl.textContent = score;
-    }
-
-    function addRandomTile() {
+    function spawnTile() {
       let empty = [];
       for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
@@ -192,100 +124,119 @@
         }
       }
       if (empty.length === 0) return;
-      let { r, c } = empty[Math.floor(Math.random() * empty.length)];
-      board[r][c] = Math.random() < 0.9 ? 2 : 4;
+      const { r, c } = empty[Math.floor(Math.random() * empty.length)];
+      board[r][c] = Math.random() > 0.1 ? 2 : 4;
+      addTileElement(r, c, board[r][c]);
     }
 
-    function slide(row, rowIndex, mergedPositions) {
-      row = row.filter(v => v);
-      for (let i = 0; i < row.length - 1; i++) {
-        if (row[i] === row[i + 1]) {
-          row[i] *= 2;
-          score += row[i];
-          mergedPositions.push({ r: rowIndex, c: i });
-          row[i + 1] = 0;
+    function addTileElement(r, c, value) {
+      const tile = document.createElement("div");
+      tile.className = `tile tile-${value}`;
+      tile.textContent = value;
+      tile.style.transform = `translate(${c * 90}px, ${r * 90}px)`;
+      grid.appendChild(tile);
+      tileElements[`${r},${c}`] = tile;
+    }
+
+    function updateTiles(newBoard, moved) {
+      const newTileElements = {};
+      for (let r = 0; r < size; r++) {
+        for (let c = 0; c < size; c++) {
+          const value = newBoard[r][c];
+          if (value !== 0) {
+            let tile = tileElements[`${r},${c}`];
+            if (!tile) {
+              // Find previous tile
+              for (let key in tileElements) {
+                if (tileElements[key].textContent == value &&
+                    !newTileElements[key]) {
+                  tile = tileElements[key];
+                  break;
+                }
+              }
+            }
+            if (!tile) {
+              tile = document.createElement("div");
+              tile.textContent = value;
+              tile.className = `tile tile-${value}`;
+              grid.appendChild(tile);
+            } else {
+              tile.className = `tile tile-${value}`;
+              tile.textContent = value;
+            }
+            tile.style.transform = `translate(${c * 90}px, ${r * 90}px)`;
+            newTileElements[`${r},${c}`] = tile;
+          }
         }
       }
-      row = row.filter(v => v);
-      while (row.length < size) row.push(0);
-      return row;
+      tileElements = newTileElements;
     }
 
-    function moveLeft() {
-      let mergedPositions = [];
-      for (let r = 0; r < size; r++) {
-        board[r] = slide(board[r], r, mergedPositions);
+    function slide(row) {
+      let arr = row.filter(v => v !== 0);
+      for (let i = 0; i < arr.length - 1; i++) {
+        if (arr[i] === arr[i + 1]) {
+          arr[i] *= 2;
+          updateScore(arr[i]);
+          arr[i + 1] = 0;
+        }
       }
-      addRandomTile();
-      drawBoard(mergedPositions);
+      arr = arr.filter(v => v !== 0);
+      while (arr.length < size) arr.push(0);
+      return arr;
     }
 
-    function moveRight() {
-      let mergedPositions = [];
-      for (let r = 0; r < size; r++) {
-        board[r] = slide(board[r].reverse(), r, mergedPositions).reverse();
-        mergedPositions = mergedPositions.map(pos => ({ r: pos.r, c: size - 1 - pos.c }));
-      }
-      addRandomTile();
-      drawBoard(mergedPositions);
+    function rotate(board) {
+      return board[0].map((_, i) => board.map(row => row[i])).reverse();
     }
 
-    function moveUp() {
-      let mergedPositions = [];
-      for (let c = 0; c < size; c++) {
-        let col = [];
-        for (let r = 0; r < size; r++) col.push(board[r][c]);
-        col = slide(col, c, mergedPositions);
-        for (let r = 0; r < size; r++) board[r][c] = col[r];
+    function move(direction) {
+      let moved = false;
+      let newBoard = board.map(row => [...row]);
+      for (let i = 0; i < direction; i++) {
+        newBoard = rotate(newBoard);
       }
-      addRandomTile();
-      drawBoard(mergedPositions);
-    }
-
-    function moveDown() {
-      let mergedPositions = [];
-      for (let c = 0; c < size; c++) {
-        let col = [];
-        for (let r = 0; r < size; r++) col.push(board[r][c]);
-        col = slide(col.reverse(), c, mergedPositions).reverse();
-        for (let r = 0; r < size; r++) board[r][c] = col[r];
+      newBoard = newBoard.map(row => slide(row));
+      for (let i = 0; i < (4 - direction) % 4; i++) {
+        newBoard = rotate(newBoard);
       }
-      addRandomTile();
-      drawBoard(mergedPositions);
+      if (JSON.stringify(newBoard) !== JSON.stringify(board)) {
+        board = newBoard;
+        moved = true;
+        spawnTile();
+      }
+      updateTiles(board, moved);
     }
 
     document.addEventListener("keydown", e => {
-      if (e.key === "ArrowLeft") moveLeft();
-      if (e.key === "ArrowRight") moveRight();
-      if (e.key === "ArrowUp") moveUp();
-      if (e.key === "ArrowDown") moveDown();
+      if (e.key === "ArrowLeft") move(0);
+      if (e.key === "ArrowUp") move(1);
+      if (e.key === "ArrowRight") move(2);
+      if (e.key === "ArrowDown") move(3);
     });
 
-    // Touch controls
+    // Touch support
     let startX, startY;
-    document.addEventListener("touchstart", e => {
-      const touch = e.touches[0];
-      startX = touch.clientX;
-      startY = touch.clientY;
+    grid.addEventListener("touchstart", e => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
     });
-
-    document.addEventListener("touchend", e => {
-      const touch = e.changedTouches[0];
-      const dx = touch.clientX - startX;
-      const dy = touch.clientY - startY;
-
+    grid.addEventListener("touchend", e => {
+      let dx = e.changedTouches[0].clientX - startX;
+      let dy = e.changedTouches[0].clientY - startY;
       if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 0) moveRight();
-        else moveLeft();
+        if (dx > 0) move(2);
+        else move(0);
       } else {
-        if (dy > 0) moveDown();
-        else moveUp();
+        if (dy > 0) move(3);
+        else move(1);
       }
     });
 
-    addRandomTile();
-    addRandomTile();
-    drawBoard();
+    // Start game
+    spawnTile();
+    spawnTile();
+    updateTiles(board, false);
   </script>
 </body>
 </html>
