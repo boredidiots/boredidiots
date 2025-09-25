@@ -32,11 +32,10 @@
 
     .game-container {
       width: 400px;
-      height: 400px;
       margin: 20px auto;
       background: #bbada0;
       border-radius: 10px;
-      position: relative;
+      padding: 10px;
     }
 
     /* Background grid */
@@ -47,8 +46,6 @@
       gap: 10px;
       width: 100%;
       height: 100%;
-      padding: 10px;
-      box-sizing: border-box;
     }
     .cell {
       background: #cdc1b4;
@@ -57,9 +54,9 @@
 
     /* Tiles */
     .tile {
-      position: absolute;
-      width: 85px;
-      height: 85px;
+      grid-row: var(--row);
+      grid-column: var(--col);
+      background: #eee4da;
       border-radius: 5px;
       font-size: 2rem;
       font-weight: bold;
@@ -69,10 +66,7 @@
       color: #776e65;
       transition: transform 0.15s ease-in-out;
     }
-    .tile.new {
-      animation: pop 0.2s;
-    }
-    .tile.merged {
+    .tile.new, .tile.merged {
       animation: pop 0.2s;
     }
     @keyframes pop {
@@ -92,8 +86,8 @@
   <h1>2048</h1>
   <p class="score">Score: <span id="score">0</span></p>
 
-  <div class="game-container" id="game">
-    <div class="grid">
+  <div class="game-container">
+    <div class="grid" id="grid">
       <!-- Background cells -->
       <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
       <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
@@ -106,21 +100,20 @@
   <button onclick="restartGame()">Restart</button>
 
   <script>
-    const gameEl = document.getElementById("game");
+    const gridEl = document.getElementById("grid");
     const scoreEl = document.getElementById("score");
     const statusEl = document.getElementById("status");
-    const cellSize = 95; // 85px tile + 10px gap
-    let board, score, tileId;
+
+    let board, score;
 
     function initBoard() {
       board = Array(4).fill().map(() => Array(4).fill(0));
       score = 0;
-      tileId = 0;
       statusEl.textContent = "";
-      gameEl.querySelectorAll(".tile").forEach(t => t.remove());
+      updateUI();
       addRandomTile();
       addRandomTile();
-      renderBoard();
+      updateUI();
     }
 
     function addRandomTile() {
@@ -133,34 +126,24 @@
       if (empty.length) {
         let [r, c] = empty[Math.floor(Math.random() * empty.length)];
         board[r][c] = Math.random() < 0.9 ? 2 : 4;
-        createTile(r, c, board[r][c], true);
       }
     }
 
-    function createTile(r, c, val, isNew = false) {
-      const div = document.createElement("div");
-      div.className = "tile" + (isNew ? " new" : "");
-      div.textContent = val;
-      div.style.background = getColor(val);
-      div.dataset.row = r;
-      div.dataset.col = c;
-      div.dataset.value = val;
-      div.dataset.id = tileId++;
-      updateTilePosition(div, r, c);
-      gameEl.appendChild(div);
-    }
+    function updateUI() {
+      // Remove old tiles
+      document.querySelectorAll(".tile").forEach(t => t.remove());
 
-    function updateTilePosition(tile, r, c) {
-      tile.style.transform = `translate(${c * cellSize + 10}px, ${r * cellSize + 10}px)`;
-    }
-
-    function renderBoard() {
-      // Remove all tiles and redraw
-      gameEl.querySelectorAll(".tile").forEach(t => t.remove());
+      // Add current tiles
       for (let r = 0; r < 4; r++) {
         for (let c = 0; c < 4; c++) {
           if (board[r][c] !== 0) {
-            createTile(r, c, board[r][c]);
+            const tile = document.createElement("div");
+            tile.className = "tile";
+            tile.textContent = board[r][c];
+            tile.style.setProperty("--row", r + 1);
+            tile.style.setProperty("--col", c + 1);
+            tile.style.background = getColor(board[r][c]);
+            gridEl.appendChild(tile);
           }
         }
       }
@@ -224,7 +207,7 @@
       if (JSON.stringify(board) !== prev) {
         addRandomTile();
       }
-      renderBoard();
+      updateUI();
       checkGameOver();
     }
 
@@ -275,3 +258,4 @@
   </script>
 </body>
 </html>
+
