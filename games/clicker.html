@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Clicker Game</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <nav>
+    <a href="../index.html">Home</a>
+    <a href="../contact.html">Contact</a>
+    <a href="../games.html">Games</a>
+  </nav>
+
+  <div class="container">
+    <h1>Clicker Game</h1>
+    <p>Clicks: <span id="count">0</span></p>
+    <button id="clickBtn">Click Me!</button>
+  </div>
+
+  <script>
+    let count = 0;
+    const countSpan = document.getElementById("count");
+    document.getElementById("clickBtn").onclick = () => {
+      count++;
+      countSpan.textContent = count;
+    };
+  </script>
+</body>
+</html>
