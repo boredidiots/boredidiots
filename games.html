@@ -2,22 +2,106 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BoredIdiots - Games</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #a64ca6, #ff66b2);
+      color: white;
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+
+    header {
+      background: rgba(0, 0, 0, 0.2);
+      padding: 1rem;
+    }
+
+    nav a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1rem;
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+
+    nav a:hover {
+      text-decoration: underline;
+    }
+
+    h1 {
+      margin: 1.5rem 0;
+    }
+
+    h2 {
+      margin-top: 2rem;
+    }
+
+    iframe {
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      margin: 1rem auto;
+      display: block;
+    }
+
+    .game-link {
+      display: inline-block;
+      background: rgba(0, 0, 0, 0.2);
+      padding: 0.8rem 1.2rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: bold;
+      text-decoration: none;
+      margin-top: 1rem;
+      transition: background 0.2s;
+    }
+
+    .game-link:hover {
+      background: rgba(0, 0, 0, 0.35);
+    }
+
+    main {
+      padding: 2rem;
+    }
+  </style>
 </head>
 <body>
-  <nav>
-    <a href="index.html">Home</a>
-    <a href="contact.html">Contact</a>
-    <a href="games.html">Games</a>
-  </nav>
-  <div class="container">
+  <header>
+    <nav>
+      <a href="index.html">Home</a>
+      <a href="games.html">Games</a>
+      <a href="contact.html">Contact</a>
+    </nav>
+  </header>
+
+  <main>
     <h1>Games</h1>
-    <p>Choose a game to play:</p>
-    <ul style="list-style: none; padding: 0; font-size: 1.2rem;">
-      <li><a href="games/tic-tac-toe-ai.html">🤖 Tic Tac Toe vs AI</a></li>
-      <li><a href="games/2048.html">🔢 2048</a></li>
-    </ul>
-  </div>
+    <p>Play our games right here!</p>
+
+    <!-- Candy Clicker -->
+    <h2>Candy Clicker</h2>
+    <iframe src="https://scratch.mit.edu/projects/359071241/embed"
+            allowtransparency="true" 
+            width="800" height="600" 
+            frameborder="0" 
+            scrolling="no" 
+            allowfullscreen></iframe>
+
+    <!-- Candy Clicker 2 -->
+    <h2>Candy Clicker 2</h2>
+    <iframe src="https://scratch.mit.edu/projects/332026728/embed"
+            allowtransparency="true" 
+            width="800" height="600" 
+            frameborder="0" 
+            scrolling="no" 
+            allowfullscreen></iframe>
+
+    <!-- 2048 -->
+    <h2>2048</h2>
+    <p><a class="game-link" href="games/2048.html">▶ Play 2048</a></p>
+  </main>
 </body>
 </html>
