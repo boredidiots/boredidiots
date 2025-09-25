@@ -1,32 +1,32 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="utf-8" />
   <title>2048</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <style>
+    /* Basic page + nav */
     body {
+      margin: 0;
       font-family: Arial, sans-serif;
       background: #faf8ef;
+      color: #222;
       text-align: center;
-      margin: 0;
     }
     nav {
-      background: linear-gradient(90deg, #a855f7, #ec4899);
-      padding: 10px;
+      background: linear-gradient(90deg,#a855f7,#ec4899);
+      padding: 12px;
     }
-    nav a {
-      color: white;
-      margin: 0 15px;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    h1 { margin-top: 15px; color: #a855f7; }
-    .score { font-size: 1.5rem; margin: 10px; }
+    nav a { color: white; margin: 0 12px; text-decoration: none; font-weight: 700; }
 
+    h1 { margin: 14px 0 6px; color: #a855f7; }
+    .score { margin-bottom: 12px; font-size: 18px; }
+
+    /* Game area */
     .game-container {
-      width: 400px;
-      height: 400px;
-      margin: 20px auto;
+      width: 420px;           /* overall size */
+      max-width: 95vw;
+      margin: 18px auto;
       background: #bbada0;
       border-radius: 10px;
       padding: 10px;
@@ -34,54 +34,73 @@
       position: relative;
     }
 
+    /* Background grid */
     .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      grid-template-rows: repeat(4, 1fr);
       gap: 10px;
       width: 100%;
       height: 100%;
+      box-sizing: border-box;
+      padding-bottom: 0;
     }
-
     .cell {
       background: #cdc1b4;
-      border-radius: 5px;
+      border-radius: 6px;
+      min-height: 0; /* ensures proper shrinking */
+      aspect-ratio: 1/1;
     }
 
+    /* Tiles layer floating on top */
     .tiles-layer {
       position: absolute;
-      top: 10px;
-      left: 10px;
-      right: 10px;
+      top: 10px; left: 10px; right: 10px; /* match .game-container padding */
       bottom: 10px;
+      pointer-events: none; /* clicks go through */
     }
 
+    /* Tile visuals & animation */
     .tile {
       position: absolute;
-      border-radius: 5px;
-      font-size: 2rem;
-      font-weight: bold;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-weight: 700;
       color: #776e65;
-      transition: transform 0.2s ease-in-out;
-      width: calc((100% - 30px) / 4);
-      height: calc((100% - 30px) / 4);
+      transition: transform 220ms cubic-bezier(.2,.8,.2,1), background 120ms;
+      will-change: transform;
+      user-select: none;
+      box-sizing: border-box;
     }
-
-    .tile.new { animation: pop 0.2s; }
+    .tile.pop {
+      animation: pop 180ms ease;
+    }
     @keyframes pop {
-      0% { transform: scale(0.7); }
-      50% { transform: scale(1.1); }
+      0% { transform: scale(0.6); }
+      60% { transform: scale(1.12); }
       100% { transform: scale(1); }
     }
 
-    button { margin-top: 15px; padding: 8px 16px; font-size: 1rem; }
+    /* colors */
+    .c2 { background:#eee4da; color:#776e65 }
+    .c4 { background:#ede0c8; color:#776e65 }
+    .c8 { background:#f2b179; color:#fff }
+    .c16 { background:#f59563; color:#fff }
+    .c32 { background:#f67c5f; color:#fff }
+    .c64 { background:#f65e3b; color:#fff }
+    .c128 { background:#edcf72; color:#fff; font-size:18px }
+    .c256 { background:#edcc61; color:#fff; font-size:18px }
+    .c512 { background:#edc850; color:#fff; font-size:18px }
+    .c1024 { background:#edc53f; color:#fff; font-size:14px }
+    .c2048 { background:#edc22e; color:#fff; font-size:14px }
+    .overlay { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(0,0,0,0.5); color:white; font-size:28px; border-radius:10px; visibility:hidden; }
+    .overlay.show { visibility: visible; }
+    .controls { margin: 10px 0; }
+    .controls button { padding: 8px 14px; font-weight:700; border-radius:6px; border:none; background:#a855f7; color:white; cursor:pointer; }
   </style>
 </head>
 <body>
-
   <nav>
     <a href="../index.html">Home</a>
     <a href="../games.html">Games</a>
@@ -89,167 +108,399 @@
   </nav>
 
   <h1>2048</h1>
-  <p class="score">Score: <span id="score">0</span></p>
+  <div class="score">Score: <span id="score">0</span></div>
 
-  <div class="game-container">
-    <div class="grid">
+  <div class="game-container" id="game-container">
+    <div class="grid" id="grid">
+      <!-- background cells -->
       <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
       <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
       <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
       <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
     </div>
+
     <div class="tiles-layer" id="tiles-layer"></div>
+
+    <div class="overlay" id="overlay">Game Over<br><button onclick="restartGame()" style="margin-top:12px;padding:8px 12px;border-radius:6px;border:none;background:white;color:#a855f7;font-weight:700;cursor:pointer;">Try again</button></div>
   </div>
 
-  <p id="status"></p>
-  <button onclick="restartGame()">Restart</button>
+  <div class="controls">
+    <button onclick="restartGame()">New Game</button>
+  </div>
 
   <script>
-    const gridSize = 4;
-    let board = [];
-    let score = 0;
+  /***** 2048 implementation with correct direction mapping + animations *****/
 
-    const tilesLayer = document.getElementById('tiles-layer');
-    const scoreEl = document.getElementById('score');
-    const statusEl = document.getElementById('status');
+  const GRID = 4;
+  const GAP = 10; // px, matches CSS gap
+  const tilesLayer = document.getElementById('tiles-layer');
+  const scoreEl = document.getElementById('score');
+  const overlay = document.getElementById('overlay');
 
-    function initBoard() {
-      board = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
-      score = 0;
-      statusEl.textContent = '';
-      tilesLayer.innerHTML = '';
-      addRandomTile();
-      addRandomTile();
-      renderBoard();
-    }
+  let boardIds = [];      // GRID x GRID grid of tile ids or null
+  let tiles = {};         // id -> {value, el}
+  let nextId = 1;
+  let score = 0;
+  let busy = false;       // lock while animation runs
 
-    function addRandomTile() {
-      const empty = [];
-      for (let r = 0; r < gridSize; r++)
-        for (let c = 0; c < gridSize; c++)
-          if (board[r][c] === 0) empty.push([r,c]);
-      if (empty.length) {
-        const [r,c] = empty[Math.floor(Math.random()*empty.length)];
-        board[r][c] = Math.random() < 0.9 ? 2 : 4;
+  function cellSize() {
+    const w = tilesLayer.clientWidth;
+    return (w - (GRID - 1) * GAP) / GRID;
+  }
+
+  function resetState() {
+    boardIds = Array.from({length:GRID}, () => Array(GRID).fill(null));
+    Object.keys(tiles).forEach(id => {
+      try { tiles[id].el.remove(); } catch {}
+    });
+    tiles = {};
+    nextId = 1;
+    score = 0;
+    scoreEl.textContent = score;
+    overlay.classList.remove('show');
+  }
+
+  function spawnAt(r,c, val=null) {
+    const id = String(nextId++);
+    const value = val || (Math.random() < 0.9 ? 2 : 4);
+    boardIds[r][c] = id;
+    const el = document.createElement('div');
+    el.className = 'tile c' + value;
+    el.textContent = value;
+    el.style.width = el.style.height = `${cellSize()}px`;
+    // place initially exactly at its slot
+    const x = c * (cellSize() + GAP);
+    const y = r * (cellSize() + GAP);
+    el.style.transform = `translate(${x}px, ${y}px)`;
+    el.style.pointerEvents = 'none';
+    el.classList.add('pop');
+    tilesLayer.appendChild(el);
+    tiles[id] = { value, el };
+    // remove pop class after animation
+    setTimeout(()=>el.classList.remove('pop'), 250);
+  }
+
+  function addRandomTile() {
+    const empty = [];
+    for (let r=0;r<GRID;r++){
+      for (let c=0;c<GRID;c++){
+        if (!boardIds[r][c]) empty.push([r,c]);
       }
     }
+    if (empty.length === 0) return;
+    const [r,c] = empty[Math.floor(Math.random()*empty.length)];
+    spawnAt(r,c);
+  }
 
-    function renderBoard() {
-      tilesLayer.innerHTML = '';
-      const tileSize = (tilesLayer.clientWidth - 30)/gridSize;
-      for (let r = 0; r < gridSize; r++) {
-        for (let c = 0; c < gridSize; c++) {
-          if (board[r][c] !== 0) {
-            const div = document.createElement('div');
-            div.className = 'tile';
-            div.textContent = board[r][c];
-            div.style.background = getColor(board[r][c]);
-            div.style.transform = `translate(${c*(tileSize+10)}px, ${r*(tileSize+10)}px)`;
-            tilesLayer.appendChild(div);
+  // render positions (used when resizing or initial)
+  function layoutAllTiles() {
+    const size = cellSize();
+    for (const id in tiles) {
+      const pos = findTilePosition(id);
+      if (!pos) continue;
+      const el = tiles[id].el;
+      el.style.width = el.style.height = `${size}px`;
+      const x = pos.c * (size + GAP);
+      const y = pos.r * (size + GAP);
+      el.style.transform = `translate(${x}px, ${y}px)`;
+    }
+  }
+
+  function findTilePosition(id) {
+    for (let r=0;r<GRID;r++){
+      for (let c=0;c<GRID;c++){
+        if (boardIds[r][c] === id) return {r,c};
+      }
+    }
+    return null;
+  }
+
+  // slide/merge logic per line for left/up direction
+  // returns { newIdsLine: [...ids or null], actions: [{type:'move'|'merge', id(s), toIndex, newValue?}] }
+  function compactLine(idsLine) {
+    const result = [];
+    const actions = [];
+    // filter non-null ids
+    const items = idsLine.filter(id => id !== null);
+    let i = 0, writeIndex = 0;
+    while (i < items.length) {
+      const id1 = items[i];
+      const v1 = tiles[id1].value;
+      if (i+1 < items.length) {
+        const id2 = items[i+1];
+        const v2 = tiles[id2].value;
+        if (v1 === v2) {
+          // merge id1 and id2 into id1 (reuse id1), id2 will be removed
+          const newValue = v1 * 2;
+          actions.push({ type:'merge', id1, id2, toIndex: writeIndex, newValue });
+          result.push(id1);
+          i += 2; writeIndex++;
+          continue;
+        }
+      }
+      // simple move
+      actions.push({ type:'move', id: id1, toIndex: writeIndex });
+      result.push(id1);
+      i++; writeIndex++;
+    }
+    // fill with nulls to GRID length
+    while (result.length < GRID) result.push(null);
+    return { newIdsLine: result, actions };
+  }
+
+  // Performs a move in one of 'left','right','up','down'
+  async function doMove(direction) {
+    if (busy) return;
+    busy = true;
+    overlay.classList.remove('show');
+    const prevBoard = JSON.stringify(boardIds);
+    const newBoard = Array.from({length:GRID}, ()=>Array(GRID).fill(null));
+    const allActions = []; // list of actions to animate & finalize
+    let pointsGained = 0;
+
+    if (direction === 'left' || direction === 'right') {
+      for (let r=0;r<GRID;r++) {
+        // collect ids in the order of move
+        let rowIds = [];
+        if (direction === 'left') {
+          for (let c=0;c<GRID;c++) rowIds.push(boardIds[r][c]);
+        } else {
+          for (let c=GRID-1;c>=0;c--) rowIds.push(boardIds[r][c]);
+        }
+        const {newIdsLine, actions} = compactLine(rowIds);
+        // map newIdsLine back to columns (taking reversal for right)
+        for (let i=0;i<GRID;i++) {
+          const id = newIdsLine[i];
+          const col = (direction === 'left') ? i : (GRID-1 - i);
+          newBoard[r][col] = id;
+        }
+        // convert actions' toIndex to final coords & collect
+        for (const a of actions) {
+          if (a.type === 'move') {
+            const toCol = (direction === 'left') ? a.toIndex : (GRID-1 - a.toIndex);
+            allActions.push({ type:'move', id: a.id, to: {r, c: toCol} });
+          } else if (a.type === 'merge') {
+            const toCol = (direction === 'left') ? a.toIndex : (GRID-1 - a.toIndex);
+            allActions.push({ type:'merge', id1: a.id1, id2: a.id2, to: {r, c: toCol}, newValue: a.newValue });
+            pointsGained += a.newValue;
           }
         }
       }
-      scoreEl.textContent = score;
-    }
-
-    function getColor(val) {
-      const colors = {
-        2:'#eee4da',4:'#ede0c8',8:'#f2b179',16:'#f59563',
-        32:'#f67c5f',64:'#f65e3b',128:'#edcf72',256:'#edcc61',
-        512:'#edc850',1024:'#edc53f',2048:'#edc22e'
-      };
-      return colors[val]||'#3c3a32';
-    }
-
-    function slide(row) {
-      let arr = row.filter(v=>v);
-      for (let i=0;i<arr.length-1;i++){
-        if(arr[i]===arr[i+1]){
-          arr[i]*=2; score+=arr[i]; arr[i+1]=0;
+    } else if (direction === 'up' || direction === 'down') {
+      for (let c=0;c<GRID;c++) {
+        let colIds = [];
+        if (direction === 'up') {
+          for (let r=0;r<GRID;r++) colIds.push(boardIds[r][c]);
+        } else {
+          for (let r=GRID-1;r>=0;r--) colIds.push(boardIds[r][c]);
         }
-      }
-      arr=arr.filter(v=>v);
-      while(arr.length<gridSize) arr.push(0);
-      return arr;
-    }
-
-    function rotateBoard(times){
-      for(let t=0;t<times;t++){
-        let newB = Array(gridSize).fill().map(()=>Array(gridSize).fill(0));
-        for(let r=0;r<gridSize;r++){
-          for(let c=0;c<gridSize;c++){
-            newB[c][gridSize-1-r]=board[r][c];
+        const {newIdsLine, actions} = compactLine(colIds);
+        for (let i=0;i<GRID;i++) {
+          const id = newIdsLine[i];
+          const row = (direction === 'up') ? i : (GRID-1 - i);
+          newBoard[row][c] = id;
+        }
+        for (const a of actions) {
+          if (a.type === 'move') {
+            const toRow = (direction === 'up') ? a.toIndex : (GRID-1 - a.toIndex);
+            allActions.push({ type:'move', id: a.id, to: {r: toRow, c} });
+          } else if (a.type === 'merge') {
+            const toRow = (direction === 'up') ? a.toIndex : (GRID-1 - a.toIndex);
+            allActions.push({ type:'merge', id1: a.id1, id2: a.id2, to: {r: toRow, c}, newValue: a.newValue });
+            pointsGained += a.newValue;
           }
         }
-        board=newB;
       }
     }
 
-    function move(dir){
-      const prev=JSON.stringify(board);
-
-      if(dir==='left') {
-        for(let r=0;r<gridSize;r++) board[r]=slide(board[r]);
-      }
-      else if(dir==='right') {
-        for(let r=0;r<gridSize;r++){
-          board[r].reverse(); 
-          board[r]=slide(board[r]); 
-          board[r].reverse();
-        }
-      }
-      else if(dir==='up') {
-        rotateBoard(1);
-        for(let r=0;r<gridSize;r++) board[r]=slide(board[r]);
-        rotateBoard(3);
-      }
-      else if(dir==='down') {
-        rotateBoard(3);
-        for(let r=0;r<gridSize;r++) board[r]=slide(board[r]);
-        rotateBoard(1);
-      }
-
-      if(JSON.stringify(board)!==prev) addRandomTile();
-      renderBoard();
-      checkGameOver();
+    if (JSON.stringify(newBoard) === prevBoard) {
+      busy = false;
+      return; // no move happened
     }
 
-    function checkGameOver(){
-      for(let r=0;r<gridSize;r++)
-        for(let c=0;c<gridSize;c++){
-          if(board[r][c]===0) return;
-          if(c<gridSize-1 && board[r][c]===board[r][c+1]) return;
-          if(r<gridSize-1 && board[r][c]===board[r+1][c]) return;
-        }
-      statusEl.textContent='Game Over!';
+    // Prepare target positions mapping for animation
+    const size = cellSize();
+    const targetPos = {}; // id -> {x,y}
+    // for every id present in newBoard put its final coords
+    for (let r=0;r<GRID;r++){
+      for (let c=0;c<GRID;c++){
+        const id = newBoard[r][c];
+        if (id) targetPos[id] = { x: c * (size + GAP), y: r * (size + GAP) };
+      }
+    }
+    // For merged second ids we want them to animate to same target as id1
+    for (const a of allActions) {
+      if (a.type === 'merge') {
+        // ensure id2 has target too (it will be removed after)
+        targetPos[a.id2] = { x: a.to.c * (size + GAP), y: a.to.r * (size + GAP) };
+        // id1 also moves there (if not already)
+        targetPos[a.id1] = { x: a.to.c * (size + GAP), y: a.to.r * (size + GAP) };
+      }
     }
 
-    function restartGame(){ initBoard(); }
-
-    document.addEventListener('keydown', e=>{
-      if(e.key==='ArrowLeft') move('left');
-      if(e.key==='ArrowRight') move('right');
-      if(e.key==='ArrowUp') move('up');
-      if(e.key==='ArrowDown') move('down');
-    });
-
-    let startX,startY;
-    document.addEventListener('touchstart', e=>{
-      const t=e.touches[0]; 
-      startX=t.clientX; startY=t.clientY; 
-    });
-    document.addEventListener('touchend', e=>{
-      const t=e.changedTouches[0];
-      const dx=t.clientX-startX, dy=t.clientY-startY;
-      if(Math.abs(dx)>Math.abs(dy)){
-        if(dx>30) move('right'); else if(dx<-30) move('left');
+    // Animate all existing tiles to their target (if any)
+    for (const id in tiles) {
+      const el = tiles[id].el;
+      if (targetPos[id]) {
+        el.style.transition = 'transform 220ms cubic-bezier(.2,.8,.2,1)';
+        requestAnimationFrame(()=> {
+          el.style.transform = `translate(${targetPos[id].x}px, ${targetPos[id].y}px)`;
+        });
       } else {
-        if(dy>30) move('down'); else if(dy<-30) move('up');
+        // tile was removed (shouldn't happen normally) — animate fade then remove
+        el.style.transition = 'opacity 180ms';
+        el.style.opacity = '0';
       }
-    });
+    }
 
-    initBoard();
+    // Wait for the transition to finish, then finalize state
+    await new Promise(res => setTimeout(res, 240));
+
+    // Finalize merges and cleanup
+    // 1) apply new values for merged id1, remove id2 elements
+    for (const a of allActions) {
+      if (a.type === 'merge') {
+        const id1 = a.id1, id2 = a.id2;
+        // update id1 value & text/background
+        tiles[id1].value = a.newValue;
+        const el1 = tiles[id1].el;
+        el1.textContent = a.newValue;
+        el1.className = 'tile c' + a.newValue + ' pop';
+        // remove id2 element
+        if (tiles[id2] && tiles[id2].el) {
+          tiles[id2].el.remove();
+          delete tiles[id2];
+        }
+      }
+    }
+
+    // 2) move simple moved tiles — their element already at target; update nothing else
+    // 3) Update boardIds reference to newBoard
+    boardIds = newBoard;
+
+    // 4) update tiles map for values and recolor (cover simple moves)
+    for (let r=0;r<GRID;r++){
+      for (let c=0;c<GRID;c++){
+        const id = boardIds[r][c];
+        if (id && tiles[id]) {
+          // ensure element matches value & color
+          tiles[id].el.className = 'tile c' + tiles[id].value;
+          tiles[id].el.textContent = tiles[id].value;
+        }
+      }
+    }
+
+    // 5) update score
+    score += pointsGained;
+    scoreEl.textContent = score;
+
+    // 6) clear any lingering 'pop' class after animation
+    setTimeout(() => {
+      for (const id in tiles) tiles[id].el.classList.remove('pop');
+    }, 260);
+
+    // 7) spawn a random tile in the empty space
+    addRandomTile();
+
+    // 8) render small adjustments (tile sizes if resized)
+    layoutAllTiles();
+
+    // 9) check game over
+    if (!hasMoves()) {
+      overlay.classList.add('show');
+    }
+
+    busy = false;
+  }
+
+  function hasMoves() {
+    for (let r=0;r<GRID;r++){
+      for (let c=0;c<GRID;c++){
+        if (!boardIds[r][c]) return true;
+        const val = tiles[boardIds[r][c]].value;
+        if (c < GRID-1 && boardIds[r][c+1] && tiles[boardIds[r][c+1]].value === val) return true;
+        if (r < GRID-1 && boardIds[r+1][c] && tiles[boardIds[r+1][c]].value === val) return true;
+      }
+    }
+    return false;
+  }
+
+  // PUBLIC wrappers for directions to keep mapping clear
+  function moveLeft() { return doMove('left'); }
+  function moveRight(){ return doMove('right'); }
+  function moveUp()   { return doMove('up'); }
+  function moveDown() { return doMove('down'); }
+
+  // Input handlers
+  document.addEventListener('keydown', e => {
+    if (busy) return;
+    if (e.key === 'ArrowLeft') moveLeft();
+    else if (e.key === 'ArrowRight') moveRight();
+    else if (e.key === 'ArrowUp') moveUp();
+    else if (e.key === 'ArrowDown') moveDown();
+  });
+
+  let sx = 0, sy = 0;
+  document.addEventListener('touchstart', e => {
+    if (!e.touches || !e.touches[0]) return;
+    sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+  }, {passive:true});
+  document.addEventListener('touchend', e => {
+    if (busy) return;
+    if (!e.changedTouches || !e.changedTouches[0]) return;
+    const dx = e.changedTouches[0].clientX - sx;
+    const dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) > Math.abs(dy)) {
+      if (dx > 30) moveRight();
+      else if (dx < -30) moveLeft();
+    } else {
+      if (dy > 30) moveDown();
+      else if (dy < -30) moveUp();
+    }
+  }, {passive:true});
+
+  // resize handling: recompute sizes and snap tiles into place
+  window.addEventListener('resize', () => {
+    // update tile dimensions and positions
+    for (const id in tiles) {
+      const el = tiles[id].el;
+      el.style.width = el.style.height = `${cellSize()}px`;
+    }
+    layoutAllTiles();
+  });
+
+  // restart/new game
+  function restartGame() {
+    resetState();
+    // spawn two starting tiles and build their elements
+    spawnInitialTwo();
+  }
+
+  function spawnInitialTwo() {
+    // spawn two tiles by placing ids into boardIds and creating elements
+    const empty = [];
+    for (let r=0;r<GRID;r++) for (let c=0;c<GRID;c++) empty.push([r,c]);
+    // pick two distinct
+    const idxA = Math.floor(Math.random()*empty.length);
+    const a = empty.splice(idxA,1)[0];
+    const idxB = Math.floor(Math.random()*empty.length);
+    const b = empty.splice(idxB,1)[0];
+    spawnAt(a[0], a[1]);
+    spawnAt(b[0], b[1]);
+    layoutAllTiles();
+  }
+
+  // initial game start
+  function init() {
+    resetState();
+    spawnInitialTwo();
+  }
+
+  // expose restart to global (used by button)
+  window.restartGame = restartGame;
+
+  // start
+  init();
   </script>
-
 </body>
 </html>
