@@ -38,21 +38,33 @@
       border-radius: 10px;
       padding: 10px;
       box-sizing: border-box;
+      position: relative;
+    }
+
+    .grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       grid-template-rows: repeat(4, 1fr);
       gap: 10px;
-      position: relative;
+      width: 100%;
+      height: 100%;
     }
 
     .cell {
       background: #cdc1b4;
       border-radius: 5px;
-      width: 100%;
-      height: 100%;
+    }
+
+    .tiles-layer {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
     }
 
     .tile {
+      position: absolute;
       border-radius: 5px;
       font-size: 2rem;
       font-weight: bold;
@@ -60,10 +72,11 @@
       align-items: center;
       justify-content: center;
       color: #776e65;
-      transition: all 0.2s ease-in-out;
-      width: 100%;
-      height: 100%;
+      transition: transform 0.2s ease-in-out;
+      width: calc((100% - 30px) / 4); /* 4 cells, 3 gaps of 10px */
+      height: calc((100% - 30px) / 4);
     }
+
     .tile.new, .tile.merged {
       animation: pop 0.2s;
     }
@@ -84,29 +97,32 @@
   <h1>2048</h1>
   <p class="score">Score: <span id="score">0</span></p>
 
-  <div class="game-container" id="game"></div>
+  <div class="game-container" id="game">
+    <div class="grid">
+      <!-- background cells -->
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+      <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+    </div>
+    <div class="tiles-layer" id="tiles-layer"></div>
+  </div>
 
   <p id="status"></p>
   <button onclick="restartGame()">Restart</button>
 
   <script>
-    const gameEl = document.getElementById("game");
-    const scoreEl = document.getElementById("score");
-    const statusEl = document.getElementById("status");
     const gridSize = 4;
     let board, score;
+    const tilesLayer = document.getElementById("tiles-layer");
+    const scoreEl = document.getElementById("score");
+    const statusEl = document.getElementById("status");
 
     function initBoard() {
       board = Array(gridSize).fill().map(() => Array(gridSize).fill(0));
       score = 0;
       statusEl.textContent = "";
-      gameEl.innerHTML = ""; // reset
-      // add background cells
-      for (let i = 0; i < gridSize * gridSize; i++) {
-        const cell = document.createElement("div");
-        cell.className = "cell";
-        gameEl.appendChild(cell);
-      }
+      tilesLayer.innerHTML = "";
       addRandomTile();
       addRandomTile();
       renderBoard();
@@ -126,8 +142,8 @@
     }
 
     function renderBoard() {
-      // remove old tiles
-      [...gameEl.querySelectorAll(".tile")].forEach(t => t.remove());
+      tilesLayer.innerHTML = "";
+      const tileSize = (tilesLayer.clientWidth - 30) / gridSize;
       for (let r = 0; r < gridSize; r++) {
         for (let c = 0; c < gridSize; c++) {
           if (board[r][c] !== 0) {
@@ -135,9 +151,8 @@
             div.className = "tile";
             div.textContent = board[r][c];
             div.style.background = getColor(board[r][c]);
-            div.style.gridRowStart = r + 1;
-            div.style.gridColumnStart = c + 1;
-            gameEl.appendChild(div);
+            div.style.transform = `translate(${c * (tileSize + 10)}px, ${r * (tileSize + 10)}px)`;
+            tilesLayer.appendChild(div);
           }
         }
       }
