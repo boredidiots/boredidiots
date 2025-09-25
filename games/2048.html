@@ -73,7 +73,7 @@
       justify-content: center;
       color: #776e65;
       transition: transform 0.2s ease-in-out;
-      width: calc((100% - 30px) / 4); /* 4 cells, 3 gaps of 10px */
+      width: calc((100% - 30px) / 4); /* 4 cells + 3 gaps of 10px */
       height: calc((100% - 30px) / 4);
     }
 
@@ -205,13 +205,13 @@
           board[r].reverse();
         }
       } else if (dir === "up") {
-        rotateBoard(1);
+        rotateBoard(3); // fixed
         for (let r = 0; r < gridSize; r++) board[r] = slide(board[r]);
-        rotateBoard(3);
+        rotateBoard(1); // fixed
       } else if (dir === "down") {
-        rotateBoard(3);
+        rotateBoard(1); // fixed
         for (let r = 0; r < gridSize; r++) board[r] = slide(board[r]);
-        rotateBoard(1);
+        rotateBoard(3); // fixed
       }
       if (JSON.stringify(board) !== prev) {
         addRandomTile();
@@ -237,31 +237,4 @@
 
     document.addEventListener("keydown", e => {
       if (e.key === "ArrowLeft") move("left");
-      if (e.key === "ArrowRight") move("right");
-      if (e.key === "ArrowUp") move("up");
-      if (e.key === "ArrowDown") move("down");
-    });
-
-    let startX, startY;
-    document.addEventListener("touchstart", e => {
-      const t = e.touches[0];
-      startX = t.clientX;
-      startY = t.clientY;
-    });
-    document.addEventListener("touchend", e => {
-      const t = e.changedTouches[0];
-      let dx = t.clientX - startX;
-      let dy = t.clientY - startY;
-      if (Math.abs(dx) > Math.abs(dy)) {
-        if (dx > 30) move("right");
-        else if (dx < -30) move("left");
-      } else {
-        if (dy > 30) move("down");
-        else if (dy < -30) move("up");
-      }
-    });
-
-    initBoard();
-  </script>
-</body>
-</html>
+      if (e
