@@ -36,35 +36,30 @@
       margin: 1.5rem 0;
     }
 
-    h2 {
+    .game-list {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
       margin-top: 2rem;
-    }
-
-    iframe {
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-      margin: 1rem auto;
-      display: block;
     }
 
     .game-link {
       display: inline-block;
-      background: rgba(0, 0, 0, 0.2);
-      padding: 0.8rem 1.2rem;
-      border-radius: 8px;
+      background: rgba(0, 0, 0, 0.25);
+      padding: 1rem 2rem;
+      border-radius: 10px;
       color: white;
+      font-size: 1.3rem;
       font-weight: bold;
       text-decoration: none;
-      margin-top: 1rem;
-      transition: background 0.2s;
+      width: 250px;
+      transition: background 0.2s, transform 0.2s;
     }
 
     .game-link:hover {
-      background: rgba(0, 0, 0, 0.35);
-    }
-
-    main {
-      padding: 2rem;
+      background: rgba(0, 0, 0, 0.4);
+      transform: scale(1.05);
     }
   </style>
 </head>
@@ -79,29 +74,13 @@
 
   <main>
     <h1>Games</h1>
-    <p>Play our games right here!</p>
+    <p>Select a game to play:</p>
 
-    <!-- Candy Clicker -->
-    <h2>Candy Clicker</h2>
-    <iframe src="https://scratch.mit.edu/projects/359071241/embed"
-            allowtransparency="true" 
-            width="800" height="600" 
-            frameborder="0" 
-            scrolling="no" 
-            allowfullscreen></iframe>
-
-    <!-- Candy Clicker 2 -->
-    <h2>Candy Clicker 2</h2>
-    <iframe src="https://scratch.mit.edu/projects/332026728/embed"
-            allowtransparency="true" 
-            width="800" height="600" 
-            frameborder="0" 
-            scrolling="no" 
-            allowfullscreen></iframe>
-
-    <!-- 2048 -->
-    <h2>2048</h2>
-    <p><a class="game-link" href="games/2048.html">▶ Play 2048</a></p>
+    <div class="game-list">
+      <a class="game-link" href="games/candyclicker.html">🍬 Candy Clicker</a>
+      <a class="game-link" href="games/candyclicker2.html">🍭 Candy Clicker 2</a>
+      <a class="game-link" href="games/2048.html">🔢 2048</a>
+    </div>
   </main>
 </body>
 </html>
