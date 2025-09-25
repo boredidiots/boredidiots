@@ -37,7 +37,27 @@
 
     .score {
       font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    .controls {
       margin-bottom: 20px;
+    }
+
+    .controls button {
+      padding: 8px 15px;
+      font-size: 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background: #ff69b4;
+      color: white;
+      font-weight: bold;
+      transition: background 0.2s;
+    }
+
+    .controls button:hover {
+      background: #ff85c1;
     }
 
     .grid {
@@ -94,15 +114,16 @@
 
   <h1>2048</h1>
   <div class="score">Score: <span id="score">0</span></div>
+  <div class="controls">
+    <button onclick="newGame()">New Game</button>
+  </div>
   <div class="grid" id="grid"></div>
 
   <script>
     const grid = document.getElementById("grid");
     const scoreDisplay = document.getElementById("score");
     const size = 4;
-    let score = 0;
-    let board = Array(size).fill().map(() => Array(size).fill(0));
-    let tileElements = {};
+    let score, board, tileElements;
 
     // Create grid background
     for (let i = 0; i < size * size; i++) {
@@ -138,23 +159,13 @@
       tileElements[`${r},${c}`] = tile;
     }
 
-    function updateTiles(newBoard, moved) {
+    function updateTiles(newBoard) {
       const newTileElements = {};
       for (let r = 0; r < size; r++) {
         for (let c = 0; c < size; c++) {
           const value = newBoard[r][c];
           if (value !== 0) {
             let tile = tileElements[`${r},${c}`];
-            if (!tile) {
-              // Find previous tile
-              for (let key in tileElements) {
-                if (tileElements[key].textContent == value &&
-                    !newTileElements[key]) {
-                  tile = tileElements[key];
-                  break;
-                }
-              }
-            }
             if (!tile) {
               tile = document.createElement("div");
               tile.textContent = value;
@@ -167,6 +178,12 @@
             tile.style.transform = `translate(${c * 90}px, ${r * 90}px)`;
             newTileElements[`${r},${c}`] = tile;
           }
+        }
+      }
+      // Remove old tiles
+      for (let key in tileElements) {
+        if (!newTileElements[key]) {
+          grid.removeChild(tileElements[key]);
         }
       }
       tileElements = newTileElements;
@@ -205,7 +222,7 @@
         moved = true;
         spawnTile();
       }
-      updateTiles(board, moved);
+      updateTiles(board);
     }
 
     document.addEventListener("keydown", e => {
@@ -233,10 +250,19 @@
       }
     });
 
+    function newGame() {
+      score = 0;
+      board = Array(size).fill().map(() => Array(size).fill(0));
+      tileElements = {};
+      scoreDisplay.textContent = score;
+      grid.querySelectorAll(".tile").forEach(t => t.remove());
+      spawnTile();
+      spawnTile();
+      updateTiles(board);
+    }
+
     // Start game
-    spawnTile();
-    spawnTile();
-    updateTiles(board, false);
+    newGame();
   </script>
 </body>
 </html>
