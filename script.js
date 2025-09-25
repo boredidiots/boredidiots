@@ -1,3 +1,1 @@
-document.addEventListener("DOMContentLoaded", () => {
-  console.log("Welcome to boredidiots!");
-});
+console.log('Welcome to BoredIdiots!');
